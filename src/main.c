@@ -19,6 +19,8 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app);
 
+#define LV_TICK_CUSTOM 0
+
 static uint32_t count;
 
 #ifdef CONFIG_GPIO
@@ -50,12 +52,24 @@ static void lv_btn_click_callback(lv_event_t *e)
 	count = 0;
 }
 
+
+
+static void set_temp(void * bar, int32_t temp)
+{
+    lv_bar_set_value((lv_obj_t *)bar, temp, LV_ANIM_ON);
+}
+
+
+
 int main(void)
 {
+	lv_init();
 	char count_str[11] = {0};
 	const struct device *display_dev;
 	lv_obj_t *hello_world_label;
 	lv_obj_t *count_label;
+	lv_obj_t * bar1;
+
 
 	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 	if (!device_is_ready(display_dev)) {
@@ -120,23 +134,40 @@ int main(void)
 		hello_world_label = lv_label_create(lv_scr_act());
 	}
 
-	lv_label_set_text(hello_world_label, "Hello world!");
-	lv_obj_align(hello_world_label, LV_ALIGN_CENTER, 0, 0);
-	printk("hello world set");
+	lv_label_set_text(hello_world_label, "FFT VISUALIZER");
+	lv_obj_align(hello_world_label, LV_ALIGN_TOP_LEFT, 0, 0);
+	printk("FFT visulizer set\r\n");
 
-	count_label = lv_label_create(lv_scr_act());
-	lv_obj_align(count_label, LV_ALIGN_BOTTOM_MID, 0, 0);
+	/*bar1 = lv_bar_create(lv_scr_act());
+	lv_obj_set_size(bar1, 100, 10);
+	lv_obj_align(bar1, LV_ALIGN_TOP_MID, 0, -30);
+	lv_bar_set_value(bar1, 70, LV_ANIM_OFF); */
+
+	static lv_style_t style_indic;
+
+    lv_style_init(&style_indic);
+    lv_style_set_bg_opa(&style_indic, LV_OPA_COVER);
+    lv_style_set_bg_color(&style_indic, lv_palette_main(LV_PALETTE_DEEP_PURPLE));
+    //lv_style_set_bg_grad_color(&style_indic, lv_palette_main(LV_PALETTE_BLUE));
+    //lv_style_set_bg_grad_dir(&style_indic, LV_GRAD_DIR_VER);
+
+
+	bar1 = lv_bar_create(lv_scr_act());
+	lv_obj_add_style(bar1, &style_indic, LV_PART_INDICATOR);
+    lv_obj_set_size(bar1, 10, 150);
+    lv_bar_set_range(bar1, 0, 100);
+    lv_bar_set_value(bar1, 0, LV_ANIM_OFF);
+    lv_obj_align(bar1, LV_ALIGN_CENTER, 0, 30);
+
 
 	lv_task_handler();
 	display_blanking_off(display_dev);
-
+	uint8_t count2=0;
 	while (1) {
-		if ((count % 100) == 0U) {
-			sprintf(count_str, "%d", count/100U);
-			lv_label_set_text(count_label, count_str);
-		}
+		lv_bar_set_value(bar1, count2, LV_ANIM_OFF);
 		lv_task_handler();
-		++count;
-		k_sleep(K_MSEC(10));
+		if (count2<=100)count2++;
+		else count2 = 0;
+		k_sleep(K_MSEC(100));
 	}
 }
