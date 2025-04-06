@@ -1,0 +1,19 @@
+{
+  "toolchainPath": "c:\\ncs\\toolchains\\cf2149caf2",
+  "sdkPath": "c:\\ncs\\v2.6.1",
+  "board": "nrf5340dk_nrf5340_cpuapp",
+  "boardDirs": [
+    "c:/ncs/v2.6.1/zephyr/boards/arm/nrf5340dk_nrf5340"
+  ],
+  "boardRevision": "",
+  "boardDir": "c:/ncs/v2.6.1/zephyr/boards/arm/nrf5340dk_nrf5340",
+  "shouldBuild": true,
+  "optimizations": "none",
+  "cmakeArgs": [],
+  "confFiles": [],
+  "buildDirectory": "build",
+  "kconfigFragments": [],
+  "snippets": [],
+  "dtcOverlays": [],
+  "extraDtcOverlays": []
+}

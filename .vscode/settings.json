@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "display.h": "c",
+        "gpio.h": "c",
+        "lvgl.h": "c"
+    }
+}
