@@ -15,6 +15,10 @@
 	chosen {
 		zephyr,display = &ili9341;
 	};
+
+	zephyr,user {
+		io-channels = <&adc 0>;
+	};
 };
 
 &spi4{

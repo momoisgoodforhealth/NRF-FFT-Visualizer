@@ -855,4 +855,7 @@
 			phandle = < 0x11 >;
 		};
 	};
+	zephyr,user {
+		io-channels = < &adc 0x0 >;
+	};
 };

@@ -3,6 +3,10 @@
         "display.h": "c",
         "gpio.h": "c",
         "lvgl.h": "c",
-        "lvgl_input_device.h": "c"
+        "lvgl_input_device.h": "c",
+        "algorithm": "c",
+        "limits": "c",
+        "random": "c",
+        "utility": "c"
     }
 }
