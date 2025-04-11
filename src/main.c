@@ -37,6 +37,8 @@ static uint32_t saadc_current_buffer = 0;
 
 uint32_t adcval=0;
 
+static lv_style_t style_indic;
+
 static void configure_timer(void)
 {
     nrfx_err_t err;
@@ -228,6 +230,11 @@ static void button_isr_callback(const struct device *port,
 				struct gpio_callback *cb,
 				uint32_t pins)
 {
+    static bool color = true;
+    printk("Button pressed!\r\n");
+    if (color) lv_style_set_bg_color(&style_indic, lv_palette_main(LV_PALETTE_RED));
+    else lv_style_set_bg_color(&style_indic, lv_palette_main(LV_PALETTE_DEEP_PURPLE));
+    color = !color;
 	ARG_UNUSED(port);
 	ARG_UNUSED(cb);
 	ARG_UNUSED(pins);
@@ -267,7 +274,6 @@ int main(void)
 	lv_obj_t *hello_world_label;
 	lv_obj_t *count_label;
 	lv_obj_t * bar1;
-
 
 	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 	if (!device_is_ready(display_dev)) {
@@ -341,7 +347,6 @@ int main(void)
 	lv_obj_align(bar1, LV_ALIGN_TOP_MID, 0, -30);
 	lv_bar_set_value(bar1, 70, LV_ANIM_OFF); */
 
-	static lv_style_t style_indic;
 
     lv_style_init(&style_indic);
     lv_style_set_bg_opa(&style_indic, LV_OPA_COVER);
@@ -353,7 +358,7 @@ int main(void)
 	bar1 = lv_bar_create(lv_scr_act());
 	lv_obj_add_style(bar1, &style_indic, LV_PART_INDICATOR);
     lv_obj_set_size(bar1, 10, 150);
-    lv_bar_set_range(bar1, 0, 100);
+    lv_bar_set_range(bar1, 0, 3000);
     lv_bar_set_value(bar1, 0, LV_ANIM_OFF);
     lv_obj_align(bar1, LV_ALIGN_CENTER, 0, 30);
 
