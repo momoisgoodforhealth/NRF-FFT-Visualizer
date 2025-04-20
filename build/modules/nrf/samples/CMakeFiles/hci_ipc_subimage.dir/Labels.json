@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/CMakeFiles/hci_ipc_subimage"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/CMakeFiles/hci_ipc_subimage.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/CMakeFiles/hci_ipc_subimage-complete.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/hci_ipc_subimage-prefix/src/hci_ipc_subimage-stamp/hci_ipc_subimage-build.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/hci_ipc_subimage-prefix/src/hci_ipc_subimage-stamp/hci_ipc_subimage-configure.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/hci_ipc_subimage-prefix/src/hci_ipc_subimage-stamp/hci_ipc_subimage-download.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/hci_ipc_subimage-prefix/src/hci_ipc_subimage-stamp/hci_ipc_subimage-install.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/hci_ipc_subimage-prefix/src/hci_ipc_subimage-stamp/hci_ipc_subimage-mkdir.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/hci_ipc_subimage-prefix/src/hci_ipc_subimage-stamp/hci_ipc_subimage-patch.rule"
+		},
+		{
+			"file" : "C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/samples/hci_ipc_subimage-prefix/src/hci_ipc_subimage-stamp/hci_ipc_subimage-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"hci_ipc_subimage"
+		],
+		"name" : "hci_ipc_subimage"
+	}
+}

@@ -42,3 +42,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrfxlib/nrfxlib/crypto/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrfxlib/nrfxlib/softdevice_controller/cmake_install.cmake")
+endif()
+

@@ -27,6 +27,31 @@
 
 #include "adcconfig.h"
 
+//CMSIS
+#include <stdlib.h>
+#include <arm_math.h>
+#include <arm_const_structs.h>
+
+#define TEST_LENGTH_SAMPLES 2048
+
+/* -------------------------------------------------------------------
+* External Input and Output buffer Declarations for FFT Bin Example
+* ------------------------------------------------------------------- */
+static float32_t testInput[TEST_LENGTH_SAMPLES];
+static float32_t testOutput[TEST_LENGTH_SAMPLES];
+
+/* ------------------------------------------------------------------
+* Global variables for FFT Bin Example
+* ------------------------------------------------------------------- */
+uint32_t fftSize = 1024;
+uint32_t fftFlag = 0;
+uint32_t doBitReverse = 1;
+
+arm_rfft_fast_instance_f32 inst;
+float32_t *output, *scratch;
+
+void FFTCompute(uint32_t adcval);
+
 
 
 // ADC Config
@@ -88,20 +113,7 @@ static void saadc_event_handler(nrfx_saadc_evt_t const * p_event)
             for (int i = 0; i < p_event->data.done.size; i++) {
                 current_value = ((int16_t *)(p_event->data.done.p_buffer))[i];
                 adcval=current_value;
-                /*
-                average += current_value;
-                if (current_value > max) {
-                    max = current_value;
-                }
-                if (current_value < min) {
-                    min = current_value;
-                } */
             }
-            /*
-            average = average / p_event->data.done.size;
-            printk("SAADC buffer at 0x%x filled with %d samples\r\n", (uint32_t)p_event->data.done.p_buffer,
-                p_event->data.done.size);
-            printk("AVG=%d, MIN=%d, MAX=%d\r\n", (int16_t)average, min, max);   */
             break;
 
         default:
@@ -226,11 +238,12 @@ static struct gpio_dt_spec button_gpio = GPIO_DT_SPEC_GET_OR(
 		DT_ALIAS(sw0), gpios, {0});
 static struct gpio_callback button_callback;
 
+bool color = true;
 static void button_isr_callback(const struct device *port,
 				struct gpio_callback *cb,
 				uint32_t pins)
 {
-    static bool color = true;
+    
     printk("Button pressed!\r\n");
     if (color) lv_style_set_bg_color(&style_indic, lv_palette_main(LV_PALETTE_RED));
     else lv_style_set_bg_color(&style_indic, lv_palette_main(LV_PALETTE_DEEP_PURPLE));
@@ -274,6 +287,7 @@ int main(void)
 	lv_obj_t *hello_world_label;
 	lv_obj_t *count_label;
 	lv_obj_t * bar1;
+    lv_obj_t *value_label;
 
 	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 	if (!device_is_ready(display_dev)) {
@@ -338,9 +352,20 @@ int main(void)
 		hello_world_label = lv_label_create(lv_scr_act());
 	}
 
-	lv_label_set_text(hello_world_label, "FFT VISUALIZER");
+	lv_label_set_text(hello_world_label, "MIC VALUE VISUALIZER");
 	lv_obj_align(hello_world_label, LV_ALIGN_TOP_LEFT, 0, 0);
 	printk("FFT visulizer set\r\n");
+
+
+    value_label = lv_label_create(lv_scr_act());
+        /* Create a buffer to store the converted ADC value */
+        char buf[16];
+
+        /* Convert adcval to a string. Using snprintf helps prevent buffer overflow. */
+        snprintf(buf, sizeof(buf), "%u", adcval);
+    
+    lv_label_set_text(value_label, buf);
+    lv_obj_align(value_label, LV_ALIGN_RIGHT_MID, 0, 0);
 
 	/*bar1 = lv_bar_create(lv_scr_act());
 	lv_obj_set_size(bar1, 100, 10);
@@ -366,11 +391,54 @@ int main(void)
 	lv_task_handler();
 	display_blanking_off(display_dev);
 	uint8_t count2=0;
+
+
+    	/* Initialise instance */
+	arm_rfft_fast_init_f32(&inst, TEST_LENGTH_SAMPLES);
+
+    
+
 	while (1) {
+        FFTCompute(adcval);
+
 		lv_bar_set_value(bar1, adcval, LV_ANIM_OFF);
+        if (color) {
+            snprintf(buf, sizeof(buf), "%u", adcval);
+            lv_label_set_text(value_label, buf);
+        }
+        else {
+            float voltage = (adcval * 3.3f) / 4095.0f;
+            snprintf(buf, sizeof(buf), "%f", voltage);
+            lv_label_set_text(value_label, buf);
+        }
 		lv_task_handler();
 		if (count2<=100)count2++;
 		else count2 = 0;
 		k_sleep(K_MSEC(1));
 	}
+}
+
+
+void FFTCompute(uint32_t adcval) {
+
+    static uint16_t index = 0;
+    //static float32_t testInput[TEST_LENGTH_SAMPLES];
+    //static float32_t testOutput[TEST_LENGTH_SAMPLES];
+    if (index >= TEST_LENGTH_SAMPLES) {
+        /* Run test function */
+        arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
+        // compute and print magnitudes
+        for (uint16_t b = 0; b < TEST_LENGTH_SAMPLES/2; b++) {
+            float32_t re = testOutput[2*b];
+            float32_t im = testOutput[2*b+1];
+            int mag = (int) sqrtf(re*re + im*im);
+            printk("%u: %d\r\n", b, mag);
+        }
+        index=0;
+    }
+    else{
+        testInput[index] = (float) adcval;
+        index++;
+    }
+
 }

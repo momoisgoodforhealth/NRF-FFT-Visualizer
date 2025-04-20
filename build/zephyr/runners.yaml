@@ -15,7 +15,7 @@ config:
   board_dir: C:/ncs/v2.6.1/zephyr/boards/arm/nrf5340dk_nrf5340
   # Build outputs:
   elf_file: zephyr.elf
-  hex_file: zephyr.hex
+  hex_file: merged_domains.hex
   bin_file: zephyr.bin
   # Host tools:
   gdb: C:/ncs/toolchains/cf2149caf2/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb.exe

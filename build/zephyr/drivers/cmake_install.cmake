@@ -69,6 +69,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/zephyr/drivers/bluetooth/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/zephyr/drivers/clock_control/cmake_install.cmake")
 endif()
 

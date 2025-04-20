@@ -7,6 +7,11 @@
         "algorithm": "c",
         "limits": "c",
         "random": "c",
-        "utility": "c"
+        "utility": "c",
+        "arm_math_f16.h": "c",
+        "stdlib.h": "c",
+        "xlocale": "c",
+        "xstring": "c",
+        "string_view": "c"
     }
 }

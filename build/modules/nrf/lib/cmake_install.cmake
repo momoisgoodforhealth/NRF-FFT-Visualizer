@@ -44,6 +44,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/lib/dk_buttons_and_leds/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("C:/ncs/v2.6.1/zephyr/samples/subsys/display/lvgl/build/modules/nrf/lib/flash_patch/cmake_install.cmake")
 endif()
 
