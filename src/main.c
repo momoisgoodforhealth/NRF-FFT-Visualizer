@@ -33,6 +33,7 @@
 #include <arm_const_structs.h>
 
 #define TEST_LENGTH_SAMPLES 2048
+#define BAR_COUNT 50
 
 /* -------------------------------------------------------------------
 * External Input and Output buffer Declarations for FFT Bin Example
@@ -43,14 +44,14 @@ static float32_t testOutput[TEST_LENGTH_SAMPLES];
 /* ------------------------------------------------------------------
 * Global variables for FFT Bin Example
 * ------------------------------------------------------------------- */
-uint32_t fftSize = 1024;
-uint32_t fftFlag = 0;
-uint32_t doBitReverse = 1;
+//uint32_t fftSize = 1024;
+uint8_t fftFlag = 0;
+//uint32_t doBitReverse = 1;
 
 arm_rfft_fast_instance_f32 inst;
 float32_t *output, *scratch;
 
-void FFTCompute(uint32_t adcval);
+void FFTCompute();
 
 
 
@@ -106,14 +107,15 @@ static void saadc_event_handler(nrfx_saadc_evt_t const * p_event)
         case NRFX_SAADC_EVT_DONE:
 
             /* STEP 5.3 - Buffer has been filled. Do something with the data and proceed */
-            int64_t average = 0;
-            int16_t max = INT16_MIN;
-            int16_t min = INT16_MAX;
+            int64_t total = 0;
             int16_t current_value;
             for (int i = 0; i < p_event->data.done.size; i++) {
                 current_value = ((int16_t *)(p_event->data.done.p_buffer))[i];
-                adcval=current_value;
+                testInput[i] = current_value;
+                total = total + current_value;
             }
+            fftFlag = 1;
+            adcval = total  / SAADC_BUFFER_SIZE;
             break;
 
         default:
@@ -287,6 +289,7 @@ int main(void)
 	lv_obj_t *hello_world_label;
 	lv_obj_t *count_label;
 	lv_obj_t * bar1;
+    lv_obj_t * bar[100];
     lv_obj_t *value_label;
 
 	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
@@ -365,7 +368,7 @@ int main(void)
         snprintf(buf, sizeof(buf), "%u", adcval);
     
     lv_label_set_text(value_label, buf);
-    lv_obj_align(value_label, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_align(value_label, LV_ALIGN_BOTTOM_MID, 0, 0);
 
 	/*bar1 = lv_bar_create(lv_scr_act());
 	lv_obj_set_size(bar1, 100, 10);
@@ -379,14 +382,24 @@ int main(void)
     //lv_style_set_bg_grad_color(&style_indic, lv_palette_main(LV_PALETTE_BLUE));
     //lv_style_set_bg_grad_dir(&style_indic, LV_GRAD_DIR_VER);
 
-
+    /*
 	bar1 = lv_bar_create(lv_scr_act());
 	lv_obj_add_style(bar1, &style_indic, LV_PART_INDICATOR);
     lv_obj_set_size(bar1, 10, 150);
     lv_bar_set_range(bar1, 0, 3000);
     lv_bar_set_value(bar1, 0, LV_ANIM_OFF);
-    lv_obj_align(bar1, LV_ALIGN_CENTER, 0, 30);
-
+    lv_obj_align(bar1, LV_ALIGN_CENTER, 0, 30);*/
+    uint8_t offx=0;
+    for (uint8_t a=0; a<BAR_COUNT; a++){  
+        bar[a] = lv_bar_create(lv_scr_act());
+        lv_obj_add_style(bar[a], &style_indic, LV_PART_INDICATOR);
+        lv_obj_set_size(bar[a], 5, 150);
+        lv_bar_set_range(bar[a], 0, 3000);
+        lv_bar_set_value(bar[a], 0, LV_ANIM_OFF);
+        lv_obj_align(bar[a], LV_ALIGN_OUT_LEFT_MID, offx, 30);
+        offx=offx+5;
+    }
+ 
 
 	lv_task_handler();
 	display_blanking_off(display_dev);
@@ -399,9 +412,14 @@ int main(void)
     
 
 	while (1) {
-        FFTCompute(adcval);
+        if (fftFlag) FFTCompute();
 
-		lv_bar_set_value(bar1, adcval, LV_ANIM_OFF);
+		//lv_bar_set_value(bar1, adcval, LV_ANIM_OFF);
+        
+        for (uint8_t b=0; b<BAR_COUNT; b++){  
+            lv_bar_set_value(bar[b], adcval, LV_ANIM_OFF);
+        }
+        
         if (color) {
             snprintf(buf, sizeof(buf), "%u", adcval);
             lv_label_set_text(value_label, buf);
@@ -419,26 +437,15 @@ int main(void)
 }
 
 
-void FFTCompute(uint32_t adcval) {
-
-    static uint16_t index = 0;
-    //static float32_t testInput[TEST_LENGTH_SAMPLES];
-    //static float32_t testOutput[TEST_LENGTH_SAMPLES];
-    if (index >= TEST_LENGTH_SAMPLES) {
-        /* Run test function */
-        arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
-        // compute and print magnitudes
-        for (uint16_t b = 0; b < TEST_LENGTH_SAMPLES/2; b++) {
-            float32_t re = testOutput[2*b];
-            float32_t im = testOutput[2*b+1];
-            int mag = (int) sqrtf(re*re + im*im);
-            printk("%u: %d\r\n", b, mag);
-        }
-        index=0;
+void FFTCompute() {
+    /* Run test function */
+    arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
+    // compute and print magnitudes
+    for (uint16_t b = 0; b < TEST_LENGTH_SAMPLES/2; b++) {
+        float32_t re = testOutput[2*b];
+        float32_t im = testOutput[2*b+1];
+        int mag = (int) sqrtf(re*re + im*im);
+        printk("%u: %d\r\n", b, mag);
     }
-    else{
-        testInput[index] = (float) adcval;
-        index++;
-    }
-
+    fftFlag = 0;
 }
