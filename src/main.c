@@ -32,8 +32,8 @@
 #include <arm_math.h>
 #include <arm_const_structs.h>
 
-#define TEST_LENGTH_SAMPLES 2048
-#define BAR_COUNT 50
+#define TEST_LENGTH_SAMPLES 64
+#define BAR_COUNT (TEST_LENGTH_SAMPLES/2)
 
 /* -------------------------------------------------------------------
 * External Input and Output buffer Declarations for FFT Bin Example
@@ -355,7 +355,7 @@ int main(void)
 		hello_world_label = lv_label_create(lv_scr_act());
 	}
 
-	lv_label_set_text(hello_world_label, "MIC VALUE VISUALIZER");
+	lv_label_set_text(hello_world_label, "FFT VISUALIZER - 20 KHz");
 	lv_obj_align(hello_world_label, LV_ALIGN_TOP_LEFT, 0, 0);
 	printk("FFT visulizer set\r\n");
 
@@ -393,11 +393,11 @@ int main(void)
     for (uint8_t a=0; a<BAR_COUNT; a++){  
         bar[a] = lv_bar_create(lv_scr_act());
         lv_obj_add_style(bar[a], &style_indic, LV_PART_INDICATOR);
-        lv_obj_set_size(bar[a], 5, 150);
-        lv_bar_set_range(bar[a], 0, 3000);
+        lv_obj_set_size(bar[a], 10, 150);
+        lv_bar_set_range(bar[a], 0, 5000);
         lv_bar_set_value(bar[a], 0, LV_ANIM_OFF);
         lv_obj_align(bar[a], LV_ALIGN_OUT_LEFT_MID, offx, 30);
-        offx=offx+5;
+        offx=offx+10;
     }
  
 
@@ -412,14 +412,35 @@ int main(void)
     
 
 	while (1) {
-        if (fftFlag) FFTCompute();
+        const float scale = 2.0f/TEST_LENGTH_SAMPLES;
+        if (fftFlag) {
+
+            // remove DC
+            float32_t mean = 0;
+            for (int c = 0; c < TEST_LENGTH_SAMPLES ; c++) mean += testInput[c];
+            mean /= TEST_LENGTH_SAMPLES ;
+            for (int d = 0; d < TEST_LENGTH_SAMPLES; d++) testInput[d] -= mean;
+
+            /* Run test function */
+            arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
+            // compute and print magnitudes
+            for (uint16_t b = 0; b < BAR_COUNT /*TEST_LENGTH_SAMPLES/2 */; b++) {
+                float32_t re = testOutput[2*b];
+                float32_t im = testOutput[2*b+1];
+                int mag = (int) sqrtf(re*re + im*im)* scale;
+                lv_bar_set_value(bar[b], mag, LV_ANIM_OFF);
+                printk("%u: %d\r\n", b, mag);
+    }
+    fftFlag = 0;
+        }
+        //FFTCompute();
 
 		//lv_bar_set_value(bar1, adcval, LV_ANIM_OFF);
-        
+        /*
         for (uint8_t b=0; b<BAR_COUNT; b++){  
             lv_bar_set_value(bar[b], adcval, LV_ANIM_OFF);
         }
-        
+        */
         if (color) {
             snprintf(buf, sizeof(buf), "%u", adcval);
             lv_label_set_text(value_label, buf);
@@ -430,9 +451,9 @@ int main(void)
             lv_label_set_text(value_label, buf);
         }
 		lv_task_handler();
-		if (count2<=100)count2++;
-		else count2 = 0;
-		k_sleep(K_MSEC(1));
+		//if (count2<=100)count2++;
+		//else count2 = 0;
+		//k_sleep(K_MSEC(1));
 	}
 }
 
@@ -441,7 +462,7 @@ void FFTCompute() {
     /* Run test function */
     arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
     // compute and print magnitudes
-    for (uint16_t b = 0; b < TEST_LENGTH_SAMPLES/2; b++) {
+    for (uint16_t b = 0; b < BAR_COUNT/*TEST_LENGTH_SAMPLES/2 */; b++) {
         float32_t re = testOutput[2*b];
         float32_t im = testOutput[2*b+1];
         int mag = (int) sqrtf(re*re + im*im);

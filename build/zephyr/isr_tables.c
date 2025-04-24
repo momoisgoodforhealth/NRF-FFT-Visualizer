@@ -84,23 +84,23 @@ struct _isr_table_entry __sw_isr_table _sw_isr_table[69] = {
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 2 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 3 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 4 */
-	{(const void *)0x11685, (ISR)0x35eab}, /* 5 */
+	{(const void *)0x11691, (ISR)0x35eb7}, /* 5 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 6 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 7 */
-	{(const void *)0x430a8, (ISR)0x35d17}, /* 8 */
+	{(const void *)0x430b4, (ISR)0x35d23}, /* 8 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 9 */
-	{(const void *)0x132ad, (ISR)0x35eab}, /* 10 */
+	{(const void *)0x132b9, (ISR)0x35eb7}, /* 10 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 11 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 12 */
-	{(const void *)0x11f0d, (ISR)0x35eab}, /* 13 */
-	{(const void *)0x129c9, (ISR)0x35eab}, /* 14 */
+	{(const void *)0x11f19, (ISR)0x35eb7}, /* 13 */
+	{(const void *)0x129d5, (ISR)0x35eb7}, /* 14 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 15 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 16 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 17 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 18 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 19 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 20 */
-	{(const void *)0x0, (ISR)0xf30d}, /* 21 */
+	{(const void *)0x0, (ISR)0xf319}, /* 21 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 22 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 23 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 24 */
@@ -121,7 +121,7 @@ struct _isr_table_entry __sw_isr_table _sw_isr_table[69] = {
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 39 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 40 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 41 */
-	{(const void *)0x121f9, (ISR)0x35eab}, /* 42 */
+	{(const void *)0x12205, (ISR)0x35eb7}, /* 42 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 43 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 44 */
 	{(const void *)0x0, (ISR)z_irq_spurious}, /* 45 */
