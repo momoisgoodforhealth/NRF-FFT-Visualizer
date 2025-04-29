@@ -69,7 +69,9 @@ static void configure_timer(void)
 {
     nrfx_err_t err;
 
-    /* STEP 3.3 - Declaring timer config and intialize nrfx_timer instance. */
+    /* Declaring timer config and intialize nrfx_timer instance. 
+    1 000 000 Hz → 1 tick/µs */
+    
     nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000);
     err = nrfx_timer_init(&timer_instance, &timer_config, NULL);
     if (err != NRFX_SUCCESS) {
@@ -86,16 +88,15 @@ static void saadc_event_handler(nrfx_saadc_evt_t const * p_event)
     nrfx_err_t err;
     switch (p_event->type)
     {
-        case NRFX_SAADC_EVT_READY:
-        
-           /* STEP 5.1 - Buffer is ready, timer (and sampling) can be started. */
-           nrfx_timer_enable(&timer_instance);
-
-            break;                        
+            case NRFX_SAADC_EVT_READY:
+            
+            /*Buffer is ready, timer (and sampling) can be started. */
+            nrfx_timer_enable(&timer_instance);
+                break;                        
             
         case NRFX_SAADC_EVT_BUF_REQ:
         
-            /* STEP 5.2 - Set up the next available buffer. Alternate between buffer 0 and 1 */
+            /*Set up the next available buffer. Alternate between buffer 0 and 1 */
             err = nrfx_saadc_buffer_set(saadc_sample_buffer[(saadc_current_buffer++)%2], SAADC_BUFFER_SIZE);
             if (err != NRFX_SUCCESS) {
                 printk("nrfx_saadc_buffer_set error: %08x", err);
@@ -106,7 +107,7 @@ static void saadc_event_handler(nrfx_saadc_evt_t const * p_event)
 
         case NRFX_SAADC_EVT_DONE:
 
-            /* STEP 5.3 - Buffer has been filled. Do something with the data and proceed */
+            /* Buffer has been filled. Do something with the data and proceed */
             int64_t total = 0;
             int16_t current_value;
             for (int i = 0; i < p_event->data.done.size; i++) {
@@ -362,7 +363,7 @@ int main(void)
 
     value_label = lv_label_create(lv_scr_act());
         /* Create a buffer to store the converted ADC value */
-        char buf[16];
+        char buf[50];
 
         /* Convert adcval to a string. Using snprintf helps prevent buffer overflow. */
         snprintf(buf, sizeof(buf), "%u", adcval);
@@ -410,24 +411,39 @@ int main(void)
 	arm_rfft_fast_init_f32(&inst, TEST_LENGTH_SAMPLES);
 
     
-
+    uint16_t highestbin=0;
 	while (1) {
         const float scale = 2.0f/TEST_LENGTH_SAMPLES;
         if (fftFlag) {
+        // 1) Remove DC:
+        float32_t mean = 0;
+        for (int i = 0; i < TEST_LENGTH_SAMPLES; i++) {
+            mean += testInput[i];
+        }
+        mean /= TEST_LENGTH_SAMPLES;
+        for (int i = 0; i < TEST_LENGTH_SAMPLES; i++) {
+            testInput[i] -= mean;
+        }
 
-            // remove DC
-            float32_t mean = 0;
-            for (int c = 0; c < TEST_LENGTH_SAMPLES ; c++) mean += testInput[c];
-            mean /= TEST_LENGTH_SAMPLES ;
-            for (int d = 0; d < TEST_LENGTH_SAMPLES; d++) testInput[d] -= mean;
+        // 2) (Optional) Apply a window, e.g. Hamming:
+        for (int i = 0; i < TEST_LENGTH_SAMPLES; i++) {
+            float w = 0.54f - 0.46f * cosf(2*PI*i/(TEST_LENGTH_SAMPLES-1));
+            testInput[i] *= w;
+        }
+
 
             /* Run test function */
             arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
+                int oldmag=0;
             // compute and print magnitudes
             for (uint16_t b = 0; b < BAR_COUNT /*TEST_LENGTH_SAMPLES/2 */; b++) {
                 float32_t re = testOutput[2*b];
                 float32_t im = testOutput[2*b+1];
                 int mag = (int) sqrtf(re*re + im*im)* scale;
+                if(b!=0) if (mag > oldmag) {
+                    oldmag = mag;
+                    highestbin = b;
+                } 
                 lv_bar_set_value(bar[b], mag, LV_ANIM_OFF);
                 printk("%u: %d\r\n", b, mag);
     }
@@ -442,7 +458,10 @@ int main(void)
         }
         */
         if (color) {
-            snprintf(buf, sizeof(buf), "%u", adcval);
+            //uint16_t lowhighestfreq = (highestbin) * 244;
+            uint16_t highighestfreq = (highestbin+1) * 244;
+            //uint16_t mid = (lowhighestfreq+highighestfreq)/2;
+            snprintf(buf, sizeof(buf), "%u Hz", highighestfreq);
             lv_label_set_text(value_label, buf);
         }
         else {
