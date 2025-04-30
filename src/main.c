@@ -371,25 +371,11 @@ int main(void)
     lv_label_set_text(value_label, buf);
     lv_obj_align(value_label, LV_ALIGN_BOTTOM_MID, 0, 0);
 
-	/*bar1 = lv_bar_create(lv_scr_act());
-	lv_obj_set_size(bar1, 100, 10);
-	lv_obj_align(bar1, LV_ALIGN_TOP_MID, 0, -30);
-	lv_bar_set_value(bar1, 70, LV_ANIM_OFF); */
-
 
     lv_style_init(&style_indic);
     lv_style_set_bg_opa(&style_indic, LV_OPA_COVER);
     lv_style_set_bg_color(&style_indic, lv_palette_main(LV_PALETTE_DEEP_PURPLE));
-    //lv_style_set_bg_grad_color(&style_indic, lv_palette_main(LV_PALETTE_BLUE));
-    //lv_style_set_bg_grad_dir(&style_indic, LV_GRAD_DIR_VER);
 
-    /*
-	bar1 = lv_bar_create(lv_scr_act());
-	lv_obj_add_style(bar1, &style_indic, LV_PART_INDICATOR);
-    lv_obj_set_size(bar1, 10, 150);
-    lv_bar_set_range(bar1, 0, 3000);
-    lv_bar_set_value(bar1, 0, LV_ANIM_OFF);
-    lv_obj_align(bar1, LV_ALIGN_CENTER, 0, 30);*/
     uint8_t offx=0;
     for (uint8_t a=0; a<BAR_COUNT; a++){  
         bar[a] = lv_bar_create(lv_scr_act());
@@ -414,8 +400,10 @@ int main(void)
     uint16_t highestbin=0;
 	while (1) {
         const float scale = 2.0f/TEST_LENGTH_SAMPLES;
+
+        // FFT Computation
         if (fftFlag) {
-        // 1) Remove DC:
+        // Remove DC:
         float32_t mean = 0;
         for (int i = 0; i < TEST_LENGTH_SAMPLES; i++) {
             mean += testInput[i];
@@ -425,7 +413,7 @@ int main(void)
             testInput[i] -= mean;
         }
 
-        // 2) (Optional) Apply a window, e.g. Hamming:
+        //window:
         for (int i = 0; i < TEST_LENGTH_SAMPLES; i++) {
             float w = 0.54f - 0.46f * cosf(2*PI*i/(TEST_LENGTH_SAMPLES-1));
             testInput[i] *= w;
@@ -434,7 +422,7 @@ int main(void)
 
             /* Run test function */
             arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
-                int oldmag=0;
+            int oldmag=0;
             // compute and print magnitudes
             for (uint16_t b = 0; b < BAR_COUNT /*TEST_LENGTH_SAMPLES/2 */; b++) {
                 float32_t re = testOutput[2*b];
@@ -446,17 +434,9 @@ int main(void)
                 } 
                 lv_bar_set_value(bar[b], mag, LV_ANIM_OFF);
                 printk("%u: %d\r\n", b, mag);
-    }
-    fftFlag = 0;
+            }
+            fftFlag = 0;
         }
-        //FFTCompute();
-
-		//lv_bar_set_value(bar1, adcval, LV_ANIM_OFF);
-        /*
-        for (uint8_t b=0; b<BAR_COUNT; b++){  
-            lv_bar_set_value(bar[b], adcval, LV_ANIM_OFF);
-        }
-        */
         if (color) {
             //uint16_t lowhighestfreq = (highestbin) * 244;
             uint16_t highighestfreq = (highestbin+1) * 244;
@@ -474,18 +454,4 @@ int main(void)
 		//else count2 = 0;
 		//k_sleep(K_MSEC(1));
 	}
-}
-
-
-void FFTCompute() {
-    /* Run test function */
-    arm_rfft_fast_f32(&inst, testInput, testOutput, 0);
-    // compute and print magnitudes
-    for (uint16_t b = 0; b < BAR_COUNT/*TEST_LENGTH_SAMPLES/2 */; b++) {
-        float32_t re = testOutput[2*b];
-        float32_t im = testOutput[2*b+1];
-        int mag = (int) sqrtf(re*re + im*im);
-        printk("%u: %d\r\n", b, mag);
-    }
-    fftFlag = 0;
 }
